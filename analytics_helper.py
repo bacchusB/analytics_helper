@@ -70,6 +70,7 @@ def is_report_sapled(report):
 def report_to_list_dfS(body,anal_cred,size=10000,list_df=None):
     """
     Returns a list of data frames from a whole analytics report
+    or appends to list you set
     """
     if  not list_df:
         list_df=[]
