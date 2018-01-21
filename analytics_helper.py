@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Analytics API helper
+Works with Reporting API v4
 Some functions, which helps to work with
 
 Need to be installed google api modules
