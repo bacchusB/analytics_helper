@@ -28,12 +28,14 @@ SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
 KEY_FILE_LOCATION = None
 VIEW_ID = None
 
+
 body={
 'reportRequests': [
 {
   'viewId': VIEW_ID,
   'dateRanges': [{'startDate': '7daysAgo', 'endDate': 'yesterday'}],
-  'metrics': [{'expression': 'ga:sessions'}]
+  'metrics': [{'expression': 'ga:sessions'}],
+  'dimensions': [{'name': 'ga:country'}]
 }]
 }
 
