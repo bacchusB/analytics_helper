@@ -11,20 +11,42 @@ from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import math
+import inspect
 
+def whoami():
+    """
+    Returns current function name
+    """
+    return inspect.stack()[1][3]
+def have_any_dimensions(columnHeader):
+	if 'dimensions' in columnHeader.keys():
+		return True
+	else:
+		return False
 
 SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
-KEY_FILE_LOCATION = 'KEY_FILE_LOCATION'
-VIEW_ID = 'VIEW_ID'
+KEY_FILE_LOCATION = None
+VIEW_ID = None
 
+body={
+'reportRequests': [
+{
+  'viewId': VIEW_ID,
+  'dateRanges': [{'startDate': '7daysAgo', 'endDate': 'yesterday'}],
+  'metrics': [{'expression': 'ga:sessions'}]
+}]
+}
 
 class ReportSampled(Exception): pass
+class CredentialsError(Exception): pass
 
-def get_credentials():
+def get_credentials(KEY_FILE_LOCATION):
     """Initializes an Analytics Reporting API V4 service object.
     Returns:
       An authorized Analytics Reporting API V4 service object.
     """
+    if KEY_FILE_LOCATION is None:
+    	raise CredentialsError('credentials error in {0}'.format(whoami()))
     credentials = ServiceAccountCredentials.from_json_keyfile_name(KEY_FILE_LOCATION, SCOPES)
 
     # Build the service object.
@@ -37,16 +59,23 @@ def report_to_dataframe(report):
     """
     columns=[] 
     columnHeader=report.get('columnHeader', {})
-    for dimension in columnHeader['dimensions']:
-        columns.append(dimension)
-    for metric in columnHeader['metricHeader']['metricHeaderEntries']:
-        columns.append(metric.get('name'))
-    
+    if have_any_dimensions(columnHeader):
+	    for dimension in columnHeader['dimensions']:
+	        columns.append(dimension)
+	    for metric in columnHeader['metricHeader']['metricHeaderEntries']:
+	        columns.append(metric.get('name'))
+    else:
+    	for metric in columnHeader['metricHeader']['metricHeaderEntries']:
+	        columns.append(metric.get('name'))
+
     rows_to_add={}
     count=0
     for row in report['data']['rows']:
         row_to_add={}
-        len_dimensions=len(columnHeader['dimensions'])
+        if have_any_dimensions(columnHeader):
+        	len_dimensions = len(columnHeader['dimensions'])
+        else:
+        	len_dimensions = 0
         len_metrics=len(columnHeader['metricHeader']['metricHeaderEntries'])
         for i in range(len_dimensions):
            row_to_add[columns[i]]=row['dimensions'][i]
@@ -68,13 +97,15 @@ def is_report_sapled(report):
             flag=True
     return flag
 
-def report_to_list_dfS(body,anal_cred,size=10000,list_df=None):
+def report_to_list_dfS(body,VIEW_ID,anal_cred,size=10000,list_df=None):
     """
     Returns a list of data frames from a whole analytics report
     or appends to list you set
     """
     if  not list_df:
         list_df=[]
+    if VIEW_ID is None:
+    	raise VIEWIDError('in functioon {0}'.format(whoami()))
     page_token=0
     body['reportRequests'][0]['pageSize']=size
     body['reportRequests'][0]['pageToken']=str(page_token)
