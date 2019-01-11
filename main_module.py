@@ -114,7 +114,7 @@ def responce_to_list_reports(body,VIEW_ID,anal_cred,size=10000,list_reports=None
     if VIEW_ID is None:
     	raise VIEWIDError('in functioon {0}'.format(whoami()))
     page_token=0
-    body['reportRequests'][0]['pageSize']=pageSize
+    body['reportRequests'][0]['pageSize']=size
     body['reportRequests'][0]['pageToken']=str(page_token)
     
     responce=anal_cred.reports().batchGet(body=body).execute()
