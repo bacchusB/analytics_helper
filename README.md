@@ -1,6 +1,6 @@
 # analytics_helper
 
-Modules to work with google analytics.
+Module to work with google analytics.
 
 Helps to get unsampled data from google analytics. Works with Reporting API v4.
 
